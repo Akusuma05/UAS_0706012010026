@@ -8,89 +8,107 @@
 import SwiftUI
 
 struct HomeView: View {
+    
+    private let timer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
+    @State private var currentIndex = 0
+    
+    @StateObject var viewModeldrink = ViewModelDrink()
+    
     var body: some View {
-        VStack {
-            HStack{
-                Text("Recomended Drinks")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding()
-                Spacer()
-            }
-            
-            Image("DryMartini")
-                .resizable()
-                .aspectRatio(3 / 2, contentMode: .fit)
-                .overlay {
-                    TextOverlay()
+        ScrollView {
+            VStack{
+                
+                //Tulisan Recommended Drinks
+                HStack{
+                    Text("Recommended Drinks")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding()
+                    Spacer()
                 }
-            
-            HStack{
-                Text("Drinks")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .padding()
-                Spacer()
+                
+                //Carousel
+                GeometryReader { proxy in
+                    TabView(selection: $currentIndex) {
+                        ForEach(1..<4) { num in
+                            Image("Image\(num)")
+                                .renderingMode(.original)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .cornerRadius(5)
+                                .overlay(Color.black.opacity(0.15))
+                                .tag(num)
+                        }
+                    }.tabViewStyle(PageTabViewStyle())
+                        .clipShape(RoundedRectangle(cornerRadius: 0))
+                        .frame(width: .infinity, height: 250)
+                        .onReceive(timer, perform: { _ in
+                            withAnimation{
+                                currentIndex = currentIndex < 3 ? currentIndex + 1 : 0
+                            }
+                        })
+                }.frame(height: 250)
+                    .overlay {
+                        TextOverlay()
+                    }
+                
+                //Tulisan Drink
+                HStack{
+                    Text("Drinks")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding()
+                    Spacer()
+                }
+                
+                //Gambar Drink
+                HStack{
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(alignment: .top, spacing: 0) {
+                            ForEach(viewModeldrink.drink, id:\.self){ Drink in
+                                HomeDrinkRow(drink: Drink)
+                            }
+                        }
+                    }.onAppear(){
+                        viewModeldrink.fetch()
+                    }
+                    .frame(height: 150)
+                }
+                
+                //Tulisan Ingredients
+                HStack{
+                    Text("Ingredients")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding()
+                    Spacer()
+                }
+                
+                //Gambar Ingredient
+                HStack{
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(alignment: .top, spacing: 0) {
+                            ForEach(1..<9) { num in
+                                Image("Image-\(num)")
+                                    .resizable()
+                                    .frame(width: 155, height: 155)
+                                    .cornerRadius(5)
+                            }
+                        }
+                    }
+                }.padding(.bottom, 40)
+                
             }
-            
-            HStack{
-                
-                Image("WhiskeySour")
-                    .renderingMode(.original)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(5)
-                
-                Image("DryMartini")
-                    .renderingMode(.original)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(5)
-                
-                Image("Margarita")
-                    .renderingMode(.original)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(5)
-            }
-            
-            HStack{
-                Text("Ingredients")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .padding()
-                Spacer()
-            }
-            
-            HStack{
-                Image("WhiskeySour")
-                    .renderingMode(.original)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(5)
-                
-                Image("DryMartini")
-                    .renderingMode(.original)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(5)
-                
-                Image("Margarita")
-                    .renderingMode(.original)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(5)
-            }
-            Spacer()
         }
     }
 }
 
+//Text Cocktail di Carousel
 struct TextOverlay: View {
     
     var gradient: LinearGradient {
         .linearGradient(
-            Gradient(colors: [.black.opacity(0.6), .black.opacity(0)]),
+            Gradient(colors: [.black.opacity(0), .black.opacity(0)]),
             startPoint: .bottom,
             endPoint: .center)
     }
@@ -99,7 +117,7 @@ struct TextOverlay: View {
         ZStack(alignment: .bottomLeading) {
             gradient
             VStack(alignment: .leading) {
-                Text("Dry Martini")
+                Text("Cocktail")
                     .font(.title2)
                     .bold()
             }
